@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { IsNull, Repository } from 'typeorm';
 import { CreateArticleDto } from './dto/create-article.dto';
 import { UpdateArticleDto } from './dto/update-article.dto';
 import { Article } from './entities/article.entity';
@@ -22,7 +22,11 @@ export class ArticleService {
   }
 
   findOne(id: number) {
-    return `This action returns a #${id} article`;
+    return this.articleRepo.findOne({
+      where: {
+        id: IsNull()
+      }
+    });
   }
 
   update(id: number, updateArticleDto: UpdateArticleDto) {

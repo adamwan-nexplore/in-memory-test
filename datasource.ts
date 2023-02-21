@@ -10,10 +10,11 @@ let config: TypeOrmModuleOptions & PostgresConnectionOptions = {
   username: process.env.DB_USERNAME,
   password: process.env.DB_PASSWORD,
   database: process.env.DB_DATABASE,
-  entities: ['dist/**/*.entity.js'],
+  entities: ['src/**/*.entity{.ts,.js}'],
   synchronize: false,
   migrationsRun: false,
-  migrations: ['dist/migrations/*.js'],
+  migrations: ['dist/**/*.entity{.ts,.js}'],
+
 };
 
 switch (process.env.NODE_ENV) {
@@ -23,6 +24,7 @@ switch (process.env.NODE_ENV) {
       migrationsRun: false,
       migrationsTransactionMode: 'each',
       synchronize: false,
+      logging: ["query", "error"],
     };
     console.log('config :>> ', config);
     break;

@@ -1,0 +1,55 @@
+name: Check DB Migrations
+
+on: [pull_request]
+
+jobs:
+  check:
+    name: Check DB Migrations
+    runs-on: ubuntu-latest
+
+    # Service containers to run with `container-job`
+    services:
+      # Label used to access the service container
+      postgres:
+        # Docker Hub PostgreSQL image
+        image: postgres
+        # Provide the password for postgres
+        env:
+          POSTGRES_USER: local
+          POSTGRES_PASSWORD: local
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          # Maps tcp port 5432 on service container to the host
+          - 5432:5432
+    steps:
+      # Checks-out your repository under $GITHUB_WORKSPACE
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      # install packages
+      - name: Install packages
+        run: yarn install
+
+      - name: Build packages
+        run: yarn build
+
+      - name: Create config file
+        uses: upgrademedia/replace-env-vars-action@master
+        with:
+          filename: manifests/${{ inputs.CONFIG_FILE }}
+        env:
+          DATASOURCE_HOST: localhost
+          DATASOURCE_PORT: 5432
+          DATASOURCE_DATABASE: test
+          DATASOURCE_USERNAME: local
+          DATASOURCE_PASSWORD: local
+          DATASOURCE_SSL: false
+
+      - name: run migration
+        env:
+          CONFIG_FILE: ../../manifests/${{ inputs.CONFIG_FILE }}
+        run: yarn migration
